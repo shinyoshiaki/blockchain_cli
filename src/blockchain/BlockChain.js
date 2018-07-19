@@ -18,7 +18,7 @@ export const action = {
 class Blockchain {
   constructor(secretKey, publicKey) {
     this.chain = [];
-    this.currentTransactions = [];    
+    this.currentTransactions = [];
     this.cypher = new Cypher(secretKey, publicKey);
     this.publicKey = this.cypher.publicKey;
     this.secretKey = this.cypher.secretKey;
@@ -121,7 +121,8 @@ class Blockchain {
       block.transactions.forEach(transaction => {
         if (transaction.recipient === address) {
           tokenNum = tokenNum.plus(new Decimal(parseFloat(transaction.amount)));
-        } else if (transaction.sender === address) {
+        }
+        if (transaction.sender === address) {
           tokenNum = tokenNum.minus(
             new Decimal(parseFloat(transaction.amount))
           );
@@ -131,7 +132,8 @@ class Blockchain {
     this.currentTransactions.forEach(transaction => {
       if (transaction.recipient === address) {
         tokenNum = tokenNum.plus(new Decimal(parseFloat(transaction.amount)));
-      } else if (transaction.sender === address) {
+      }
+      if (transaction.sender === address) {
         tokenNum = tokenNum.minus(new Decimal(parseFloat(transaction.amount)));
       }
     });
