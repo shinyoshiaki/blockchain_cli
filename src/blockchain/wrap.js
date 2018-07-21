@@ -1,2 +1,2 @@
 require("babel-register");
-require("./BlockChainTest1.js");
+require("./BlockChainTest.js");
