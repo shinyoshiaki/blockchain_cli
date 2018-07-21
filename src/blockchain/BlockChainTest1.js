@@ -16,7 +16,7 @@ function mining(blockchain) {
     const previousHash = blockchain.hash(lastBlock);
     const block = blockchain.newBlock(proof, previousHash);
 
-    console.log("new block forged", JSON.stringify(block));
+    console.log("new block forged", block);
 
     resolve(block);
   });

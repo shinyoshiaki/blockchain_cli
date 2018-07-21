@@ -8,6 +8,7 @@ function getSHA256HexString(input) {
   return SHA256(input).toString();
 }
 
+//採掘難易度(正規表現)
 const diff = /^0000/;
 
 export const action = {
@@ -46,13 +47,13 @@ class Blockchain {
       publicKey: this.publicKey, //このブロックを作った人の公開鍵
       sign: "" //このブロックを作った人の署名
     };
+    //署名を生成
     block.sign = this.cypher.encrypt(this.hash(block));
+    //ブロックチェーンに追加
     this.chain.push(block);
 
-    //リセット
+    //トランザクションプールをリセット
     this.currentTransactions = [];
-
-    //console.log("my new block", block);
 
     return block;
   }
@@ -107,7 +108,7 @@ class Blockchain {
     return tran;
   }
 
-  nowAmount(address = this.address) {    
+  nowAmount(address = this.address) {
     let tokenNum = new Decimal(0.0);
     this.chain.forEach(block => {
       block.transactions.forEach(transaction => {
@@ -178,6 +179,7 @@ class Blockchain {
     let proof = 0;
 
     while (!this.validProof(lastProof, proof, lastHash, this.address)) {
+      //ナンスの値を試行錯誤的に探す
       proof++;
     }
 
@@ -187,23 +189,22 @@ class Blockchain {
   validProof(lastProof, proof, lastHash, address) {
     const guess = `${lastProof}${proof}${lastHash}${address}`;
     const guessHash = getSHA256HexString(guess);
-
+    //先頭から４文字が０なら成功
     return diff.test(guessHash);
   }
 
   validChain(chain) {
     let index = 2;
-
     while (index < chain.length) {
       const previousBlock = chain[index - 1];
       const block = chain[index];
 
-      // Check that the hash of the block is correct
+      //ブロックの持つ前のブロックのハッシュ値と実際の前の
+      //ブロックのハッシュ値を比較
       if (block.previousHash !== this.hash(previousBlock)) {
         return false;
       }
-
-      // Check that the Proof of Work is correct
+      //ナンスの値の検証    
       if (
         !this.validProof(
           previousBlock.proof,
@@ -211,14 +212,11 @@ class Blockchain {
           this.hash(block),
           block.owner
         )
-      ) {
-        //console.log("not valid chain");
+      ) {        
         return false;
       }
-
       index++;
-    }
-    //console.log("valid chain");
+    }    
     return true;
   }
 }
