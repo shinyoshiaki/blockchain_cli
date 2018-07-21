@@ -74,6 +74,7 @@ export default class Mesh {
     const json = JSON.parse(packet);
     //このメッセージがすでに送信済みか調べる
     if (!JSON.stringify(this.packetIdList).includes(json.hash)) {
+      //console.log("broadcast", JSON.parse(packet));
       this.packetIdList.push(json.hash);
       //知っている全ノードに送信
       for (let key in this.peerList) {
@@ -115,7 +116,7 @@ export default class Mesh {
         //sdpを相手に確実に届けるためにブロードキャスト
         this.broadCast(def.MESH_OFFER, {
           from: this.nodeId,
-          to: target,//宛先
+          to: target, //宛先
           sdp: sdp
         });
       });
@@ -194,6 +195,10 @@ export default class Mesh {
         //受け取ったリストに接続する
         this.connectPeers(targetList);
         break;
+      case def.MESH_MESSAGE:
+        console.log("mesh message", json);
+        this.ev.emit(def.ONCOMMAND, json);
+        break;
       case def.BROADCAST:
         //ブロードキャスト絡みの処理
         if (this.onBroadCast(packet)) {
@@ -236,7 +241,8 @@ export default class Mesh {
             case def.MESH_MESSAGE:
               //その他のデータを受け取ったときの処理
               //イベントを起こす
-              this.ev.emit(def.ONCOMMAND, broadcastData.data);
+              //console.log("on message", broadcastData.data);
+              this.ev.emit(def.ONCOMMAND, broadcastData);
               break;
           }
         }

@@ -1,7 +1,7 @@
 import type from "./type";
 import sha1 from "sha1";
 /*
-p2ch communication model(layer)
+blockchainCli communication model(layer)
 -------------------------------
 (datalinkLayer)    <- onCommand(datalinkLayer)
 network
@@ -27,7 +27,7 @@ export function packetFormat(type, data) {
 export function sendFormat(session, body) {
   return JSON.stringify({
     layer: "transport",
-    transport: "p2ch",
+    transport: "blockchainCli",
     type: type.BLOCKCHAIN,
     session: session,
     body: body //transaction format / board format

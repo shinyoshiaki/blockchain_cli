@@ -2,34 +2,26 @@ import Blockchain from "./BlockChain";
 import type from "../constants/type";
 import * as format from "../constants/format";
 import Events from "events";
+import Node from "../node/PortalNode";
 
-let nodeId;
-let node;
+let node = new Node(null);
 
 export default class BlockchainApp {
-  constructor(id, _node) {
-    nodeId = id;
+  constructor(_node) {
     this.blockchain = new Blockchain();
     this.ev = new Events.EventEmitter();
 
-    let local = localStorage.getItem(type.BLOCKCHAIN);
-    if (local !== null && local.length > 0) {
-      this.blockchain.chain = JSON.parse(local);
-      console.log("load blockchain", this.blockchain.chain);
-    }
-
     node = _node;
 
-    node.ev.on("p2ch", networkLayer => {
+    node.ev.on("blockchainCli", networkLayer => {
       const transportLayer = JSON.parse(networkLayer);
-      console.log("blockchainApp", "p2ch", transportLayer);
 
       this.ev.emit(transportLayer.session, transportLayer.body);
       const body = transportLayer.body;
 
       switch (transportLayer.session) {
         case type.NEWBLOCK:
-          console.log("blockchainApp", "new block", body);
+          console.log("blockchainApp", "new block");
           if (
             body.index > this.blockchain.chain.length + 1 ||
             this.blockchain.chain.length === 1
@@ -47,7 +39,7 @@ export default class BlockchainApp {
             !JSON.stringify(this.blockchain.currentTransactions).includes(
               JSON.stringify(body)
             )
-          ) {            
+          ) {
             this.blockchain.addTransaction(body);
           }
           break;
@@ -75,7 +67,7 @@ export default class BlockchainApp {
       console.log("this.checkConflicts");
       node.broadCast(
         format.sendFormat(type.CONFLICT, {
-          nodeId: nodeId,
+          nodeId: node.nodeId,
           size: this.blockchain.chain.length
         })
       );
@@ -105,14 +97,13 @@ export default class BlockchainApp {
 
       console.log("new block forged", JSON.stringify(block));
 
-      this.saveChain();
-
       node.broadCast(format.sendFormat(type.NEWBLOCK, block));
 
       resolve(block);
     });
   }
 
+  //sessionLayer
   makeTransaction(recipient, amount, data) {
     const tran = this.blockchain.newTransaction(
       this.blockchain.address,
@@ -126,14 +117,6 @@ export default class BlockchainApp {
   }
 
   getChain() {
-    this.saveChain();
     return this.blockchain.chain;
-  }
-
-  saveChain() {
-    localStorage.setItem(
-      type.BLOCKCHAIN,
-      JSON.stringify(this.blockchain.chain)
-    );
   }
 }
