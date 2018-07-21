@@ -24,7 +24,8 @@ responce.mining = () => {
 };
 
 responce.makeTransaction = req => {
-  blockchainApp.makeTransaction(req[0], req[1], req[2]);
+  const body = req.split(",");
+  blockchainApp.makeTransaction(body[0], body[1], body[2]);
 };
 
 responce.balance = () => {

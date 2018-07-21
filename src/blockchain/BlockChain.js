@@ -24,13 +24,11 @@ class Blockchain {
     this.secretKey = this.cypher.secretKey;
     this.address = getSHA256HexString(this.cypher.publicKey);
     this.ev = new Events.EventEmitter();
-
     this.newBlock(0, "genesis");
   }
 
   hash(obj) {
     const objString = JSON.stringify(obj, Object.keys(obj).sort());
-
     return getSHA256HexString(objString);
   }
 
@@ -39,14 +37,14 @@ class Blockchain {
     this.newTransaction(type.SYSTEM, this.address, 1, type.REWORD);
 
     const block = {
-      index: this.chain.length + 1,
-      timestamp: Date.now(),
-      transactions: this.currentTransactions,
-      proof: proof,
-      previousHash: previousHash || this.hash(this.lastBlock()),
-      owner: this.address,
-      publicKey: this.publicKey,
-      sign: ""
+      index: this.chain.length + 1, //ブロックの番号
+      timestamp: Date.now(), //タイムスタンプ
+      transactions: this.currentTransactions, //トランザクションの塊
+      proof: proof, //ナンス
+      previousHash: previousHash || this.hash(this.lastBlock()), //前のブロックのハッシュ値
+      owner: this.address, //このブロックを作った人
+      publicKey: this.publicKey, //このブロックを作った人の公開鍵
+      sign: "" //このブロックを作った人の署名
     };
     block.sign = this.cypher.encrypt(this.hash(block));
     this.chain.push(block);
@@ -79,34 +77,29 @@ class Blockchain {
     const publicKey = block.publicKey;
     block.sign = "";
 
-    //console.log("check valid block", lastProof, block.proof, lastHash, owner);
-
+    //ナンスが正しいかどうか
     if (this.validProof(lastProof, block.proof, lastHash, owner)) {
-      //console.log("blockchain", "is  valid block");
+      //署名が正しいかどうか
       if (this.cypher.decrypt(sign, publicKey) === this.hash(block)) {
-        //console.log("is valid sign");
         block.sign = sign;
         return true;
       } else {
-        //console.log("is not valid sign");
         return false;
       }
     } else {
-      //console.log("blockchain", "is not valid block", block);
       return false;
     }
   }
 
   newTransaction(sender, recipient, amount, data) {
-    //console.log("new transaction recipent", recipient);
     const tran = {
-      sender: sender,
-      recipient: recipient,
-      amount: amount,
-      data: data,
-      now: Date.now(),
-      publicKey: this.publicKey,
-      sign: ""
+      sender: sender, //送信アドレス
+      recipient: recipient, //受取アドレス
+      amount: amount, //量
+      data: data, //任意のメッセージ
+      now: Date.now(), //タイムスタンプ
+      publicKey: this.publicKey, //公開鍵
+      sign: "" //署名
     };
     tran.sign = this.cypher.encrypt(this.hash(tran));
     this.currentTransactions.push(tran);
@@ -114,8 +107,7 @@ class Blockchain {
     return tran;
   }
 
-  nowAmount(address = this.address) {
-    //console.log("nouAmount target", address);
+  nowAmount(address = this.address) {    
     let tokenNum = new Decimal(0.0);
     this.chain.forEach(block => {
       block.transactions.forEach(transaction => {
@@ -144,25 +136,26 @@ class Blockchain {
     const amount = transaction.amount;
     const sign = transaction.sign;
     const publicKey = transaction.publicKey;
-
     const address = transaction.sender;
-
     transaction.sign = "";
+
+    //公開鍵が送金者のものかどうか
     if (getSHA256HexString(publicKey) === address) {
+      //署名が正しいかどうか
       if (this.cypher.decrypt(sign, publicKey) === this.hash(transaction)) {
-        //console.log("valid transaction sign");
         const balance = this.nowAmount(address);
-        if (balance > amount) {
-          //console.log("valid transaction balance");
+        //送金可能な金額を超えているかどうか
+        if (balance >= amount) {
           transaction.sign = sign;
           return true;
         } else {
-          //console.log("not valid transaction no balance", balance, amount);
           return false;
         }
       } else {
-        //console.log("not valid transaction sign");
+        return false;
       }
+    } else {
+      return false;
     }
   }
 
