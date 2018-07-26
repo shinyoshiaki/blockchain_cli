@@ -35,7 +35,7 @@ class Blockchain {
 
   newBlock(proof, previousHash) {
     //採掘報酬
-    this.newTransaction(type.SYSTEM, this.address, 1, type.REWORD);
+    this.newTransaction(type.SYSTEM, this.address, 1, type.REWARD);
 
     const block = {
       index: this.chain.length + 1, //ブロックの番号
