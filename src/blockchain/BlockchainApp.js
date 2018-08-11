@@ -2,14 +2,12 @@ import Blockchain from "./BlockChain";
 import type from "../constants/type";
 import * as format from "../constants/format";
 import Events from "events";
-import Node from "../node/PortalNode";
 
-// let node = new Node(null);
 let node;
 
-export default class BlockchainApp {
+export default class BlockchainApp extends Blockchain {
   constructor(_node) {
-    this.blockchain = new Blockchain();
+    super();
     this.ev = new Events.EventEmitter();
 
     node = _node;
@@ -23,34 +21,31 @@ export default class BlockchainApp {
       switch (transportLayer.session) {
         case type.NEWBLOCK:
           console.log("blockchainApp", "new block");
-          if (
-            body.index > this.blockchain.chain.length + 1 ||
-            this.blockchain.chain.length === 1
-          ) {
+          if (body.index > this.chain.length + 1 || this.chain.length === 1) {
             (async () => {
               await this.checkConflicts();
             })();
           } else {
-            this.blockchain.addBlock(body);
+            this.addBlock(body);
           }
           break;
         case type.TRANSACRION:
           console.log("blockchainApp transaction", body);
           if (
-            !JSON.stringify(this.blockchain.currentTransactions).includes(
+            !JSON.stringify(this.currentTransactions).includes(
               JSON.stringify(body)
             )
           ) {
-            this.blockchain.addTransaction(body);
+            this.addTransaction(body);
           }
           break;
         case type.CONFLICT:
           console.log("blockchain app check conflict");
-          if (this.blockchain.chain.length > body.size) {
+          if (this.chain.length > body.size) {
             console.log("blockchain app check is conflict");
             node.send(
               body.nodeId,
-              format.sendFormat(type.RESOLVE_CONFLICT, this.blockchain.chain)
+              format.sendFormat(type.RESOLVE_CONFLICT, this.chain)
             );
           }
           break;
@@ -69,16 +64,16 @@ export default class BlockchainApp {
       node.broadCast(
         format.sendFormat(type.CONFLICT, {
           nodeId: node.nodeId,
-          size: this.blockchain.chain.length
+          size: this.chain.length
         })
       );
       this.ev.on(type.RESOLVE_CONFLICT, body => {
         console.log("resolve conflict");
-        if (this.blockchain.chain.length < body.length) {
+        if (this.chain.length < body.length) {
           console.log("conflict my chain short");
-          if (this.blockchain.validChain(body)) {
+          if (this.validChain(body)) {
             console.log("conflict swap chain");
-            this.blockchain.chain = body;
+            this.chain = body;
           } else {
             console.log("conflict wrong chain");
           }
@@ -90,11 +85,11 @@ export default class BlockchainApp {
 
   mine() {
     return new Promise(resolve => {
-      const proof = this.blockchain.proofOfWork();
+      const proof = this.proofOfWork();
 
-      const lastBlock = this.blockchain.lastBlock();
-      const previousHash = this.blockchain.hash(lastBlock);
-      const block = this.blockchain.newBlock(proof, previousHash);
+      const lastBlock = this.lastBlock();
+      const previousHash = this.hash(lastBlock);
+      const block = this.newBlock(proof, previousHash);
 
       console.log("new block forged", JSON.stringify(block));
 
@@ -106,18 +101,13 @@ export default class BlockchainApp {
 
   //sessionLayer
   makeTransaction(recipient, amount, data) {
-    const tran = this.blockchain.newTransaction(
-      this.blockchain.address,
-      recipient,
-      amount,
-      data
-    );
+    const tran = this.newTransaction(this.address, recipient, amount, data);
     console.log("makeTransaction", tran);
 
     node.broadCast(format.sendFormat(type.TRANSACRION, tran));
   }
 
   getChain() {
-    return this.blockchain.chain;
+    return this.chain;
   }
 }

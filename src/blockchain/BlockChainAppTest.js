@@ -33,19 +33,20 @@ responce.mining = () => {
 
 responce.makeTransaction = req => {
   const body = req.split(",");
+  //recipient, amount, data
   blockchainApp.makeTransaction(body[0], body[1], body[2]);
 };
 
 responce.balance = () => {
-  console.log("now balance", blockchainApp.blockchain.nowAmount());
+  console.log("now balance", blockchainApp.nowAmount());
 };
 
 responce.blockchain = () => {
-  console.log("now blockchain", blockchainApp.blockchain.chain);
+  console.log("now blockchain", blockchainApp.chain);
 };
 
 responce.address = () => {
-  console.log("my address", blockchainApp.blockchain.address);
+  console.log("my address", blockchainApp.address);
 };
 
 console.log(Object.keys(responce));
