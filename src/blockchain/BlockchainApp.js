@@ -4,7 +4,8 @@ import * as format from "../constants/format";
 import Events from "events";
 import Node from "../node/PortalNode";
 
-let node = new Node(null);
+// let node = new Node(null);
+let node;
 
 export default class BlockchainApp {
   constructor(_node) {
