@@ -33,6 +33,10 @@ class Blockchain {
     return getSHA256HexString(objString);
   }
 
+  jsonStr(obj) {
+    return JSON.stringify(obj, Object.keys(obj).sort());
+  }
+
   newBlock(proof, previousHash) {
     //採掘報酬
     this.newTransaction(type.SYSTEM, this.address, 1, type.REWARD);
@@ -204,7 +208,7 @@ class Blockchain {
       if (block.previousHash !== this.hash(previousBlock)) {
         return false;
       }
-      //ナンスの値の検証    
+      //ナンスの値の検証
       if (
         !this.validProof(
           previousBlock.proof,
@@ -212,11 +216,11 @@ class Blockchain {
           this.hash(block),
           block.owner
         )
-      ) {        
+      ) {
         return false;
       }
       index++;
-    }    
+    }
     return true;
   }
 }
