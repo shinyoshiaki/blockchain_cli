@@ -1,7 +1,7 @@
 import BlockChain from "../blockchain/BlockChain";
 import inquire from "inquirer";
 
-const menuBlockchain = {
+const menuBlockChain = {
   type: "list",
   name: "bchainMenu",
   message: "select action",
@@ -35,7 +35,7 @@ function makeTransaction(blockchain, recipient, amount, data) {
 const blockchain = new BlockChain();
 
 function quetion() {
-  inquire.prompt([menuBlockchain]).then(answer => {
+  inquire.prompt([menuBlockChain]).then(answer => {
     console.log(answer.bchainMenu);
     switch (answer.bchainMenu) {
       case "mining":

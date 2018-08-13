@@ -16,7 +16,7 @@ export const action = {
   BLOCK: "BLOCK"
 };
 
-class Blockchain {
+class BlockChain {
   constructor(secretKey, publicKey) {
     this.chain = [];
     this.currentTransactions = [];
@@ -225,4 +225,4 @@ class Blockchain {
   }
 }
 
-export default Blockchain;
+export default BlockChain;

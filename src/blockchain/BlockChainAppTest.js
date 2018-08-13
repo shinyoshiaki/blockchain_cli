@@ -1,5 +1,5 @@
 import PortalNode from "../node/PortalNode";
-import BlockchainApp from "../blockchain/BlockchainApp";
+import BlockChainApp from "./BlockChainApp";
 
 const responce = {};
 const reader = require("readline").createInterface({
@@ -24,7 +24,7 @@ responce.connect = req => {
   console.log("connect to network");
   const body = req.split(",");
   node = new PortalNode(body[0], body[1], body[2], body[3]);
-  blockchainApp = new BlockchainApp(node);
+  blockchainApp = new BlockChainApp(node);
 };
 
 responce.mining = () => {

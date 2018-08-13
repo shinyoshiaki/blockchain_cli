@@ -1,11 +1,11 @@
-import Blockchain from "./BlockChain";
+import BlockChain from "./BlockChain";
 import type from "../constants/type";
 import * as format from "../constants/format";
 import Events from "events";
 
 let node;
 
-export default class BlockchainApp extends Blockchain {
+export default class BlockChainApp extends BlockChain {
   constructor(_node) {
     super();
     this.ev = new Events.EventEmitter();
